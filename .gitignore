@@ -30,5 +30,6 @@ Thumbs.db
 *.png
 !static/**/*.png
 !static/**/*.webp
+!docs/**/*.png
 stego_*.png
 cover_*.png

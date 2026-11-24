@@ -55,11 +55,15 @@ def calculate_image_comparison(
     changed_pixels = int(np.count_nonzero(np.any(diff > 0, axis=2)))
     changed_subpixels = int(np.count_nonzero(diff))
 
-    # Peta selisih: piksel yang berubah diberi warna merah, yang sama tetap hitam.
+    # Peta selisih: piksel yang berubah diberi warna merah, yang sama diberi
+    # latar gelap (bukan hitam pekat) supaya panel tetap terbaca sebagai peta
+    # walau perubahan piksel sangat sedikit.
     diff_max = diff.max(axis=2)
     changed = diff_max > 0
-    diff_vis = np.zeros(diff.shape, dtype=np.uint8)
-    diff_vis[..., 0] = np.where(changed, 255, 0).astype(np.uint8)
+    diff_vis = np.full(diff.shape, 22, dtype=np.uint8)
+    diff_vis[..., 1] = 26
+    diff_vis[..., 2] = 23
+    diff_vis[changed] = (255, 60, 60)
     diff_img = Image.fromarray(diff_vis, mode="RGB")
 
     return {
