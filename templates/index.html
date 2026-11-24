@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#101411" />
+  <title>Lab Kriptografi | Modified Blowfish &amp; Random LSB</title>
+  <link rel="stylesheet" href="/static/crypto.css" />
+  <script src="/static/crypto.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <span class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span> Lab Kriptografi</span>
+      <span class="project-label">Tugas Besar Kriptografi</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div class="shell hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow">Kriptografi &amp; Steganografi</p>
+          <h1 id="page-title">Pesan di balik<br /><span>piksel.</span></h1>
+          <p class="hero-description">Enkripsi pesan rahasia, lalu sembunyikan hasilnya di dalam citra digital.</p>
+          <ol class="algorithm-flow" aria-label="Alur penyembunyian pesan">
+            <li><strong>Modified Blowfish</strong><span>Enkripsi · ROTL32</span></li>
+            <li><strong>Key-Based Random LSB</strong><span>Penyisipan · SHA-256</span></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace shell" aria-label="Ruang kerja kriptografi">
+      <div class="tabs" role="tablist" aria-label="Mode pengolahan pesan">
+        <button id="tab-encode" class="tab-btn" type="button" role="tab" aria-selected="true" aria-controls="panel-encode">
+          <span class="tab-symbol" aria-hidden="true">&nearr;</span>
+          <span>Pengirim<small>Enkripsi &amp; sisipkan</small></span>
+        </button>
+        <button id="tab-decode" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="panel-decode" tabindex="-1">
+          <span class="tab-symbol" aria-hidden="true">&swarr;</span>
+          <span>Penerima<small>Ekstrak &amp; dekripsi</small></span>
+        </button>
+        <button id="tab-compare" class="tab-btn" type="button" role="tab" aria-selected="false" aria-controls="panel-compare" tabindex="-1">
+          <span class="tab-symbol" aria-hidden="true">&#8644;</span>
+          <span>Pembanding<small>Bandingkan citra</small></span>
+        </button>
+      </div>
+
+      <section id="panel-encode" class="panel" role="tabpanel" aria-labelledby="tab-encode">
+        <div class="workspace-grid">
+          <form id="encode-form" class="workspace-form">
+            <div class="section-heading">
+              <h2>Siapkan pesan</h2>
+              <p>Isi pesan, kunci rahasia, dan citra penampung.</p>
+            </div>
+            <div class="field">
+              <label for="plaintext">Pesan rahasia</label>
+              <textarea id="plaintext" name="plaintext" placeholder="Tulis pesan yang ingin disembunyikan..." required></textarea>
+            </div>
+            <div class="field">
+              <label for="enc-key">Kunci rahasia <span class="field-hint" id="enc-key-hint">1–56 byte UTF-8</span></label>
+              <input type="password" id="enc-key" name="secret_key" autocomplete="off" placeholder="Masukkan kunci rahasia" aria-describedby="enc-key-hint" required />
+            </div>
+            <fieldset class="field algorithm-field">
+              <legend>Algoritma enkripsi</legend>
+              <div class="algorithm-options">
+                <label class="algorithm-option">
+                  <input type="radio" name="algorithm" value="modified" checked />
+                  <span class="algorithm-card">
+                    <strong>Modified Blowfish</strong>
+                    <small>Fungsi F + ROTL32 dinamis</small>
+                  </span>
+                </label>
+                <label class="algorithm-option">
+                  <input type="radio" name="algorithm" value="standard" />
+                  <span class="algorithm-card">
+                    <strong>Blowfish Standar</strong>
+                    <small>Tanpa modifikasi</small>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+            <div class="field">
+              <label id="cover-file-label" for="cover-file">Citra penampung</label>
+              <div class="file-picker">
+                <input type="file" id="cover-file" name="cover_image" accept=".png,.bmp,image/png,image/bmp" aria-labelledby="cover-file-label" aria-describedby="cover-file-hint cover-file-error" required />
+                <label class="file-control" for="cover-file">
+                  <span class="file-icon" aria-hidden="true"></span>
+                  <span class="file-name">Seret &amp; letakkan atau klik untuk pilih foto</span>
+                  <span id="cover-file-hint" class="file-hint">PNG atau BMP · 1 gambar</span>
+                </label>
+                <p id="cover-file-error" class="file-error" role="status"></p>
+              </div>
+            </div>
+            <button class="btn-primary" type="submit"><span>Enkripsi &amp; sisipkan pesan</span><span aria-hidden="true">&nearr;</span></button>
+            <p id="encode-alert" class="alert" role="status"></p>
+          </form>
+
+          <section class="workspace-output" aria-labelledby="encode-result-title">
+            <div class="section-heading">
+              <h2 id="encode-result-title">Hasil enkripsi</h2>
+              <p>Ciphertext dan citra hasil penyisipan.</p>
+            </div>
+            <div class="output-field">
+              <div class="output-label"><h3 id="cipher-label">Ciphertext</h3><span id="cipher-algo">HEX</span></div>
+              <pre id="cipher-hex" class="code-box" aria-labelledby="cipher-label" data-empty>Menunggu proses enkripsi.</pre>
+            </div>
+            <div id="stego-empty" class="stego-empty">
+              <div class="empty-mark" aria-hidden="true"></div>
+              <strong>Belum ada citra hasil</strong>
+              <p>Citra bisa diunduh setelah pesan berhasil disisipkan.</p>
+            </div>
+            <div id="stego-result-area" hidden>
+              <div id="variant-switch" class="variant-switch" role="group" aria-label="Pilih varian hasil" hidden>
+                <button type="button" class="variant-btn" data-variant="modified" aria-pressed="true">
+                  <strong>Modified</strong><small>ROTL32</small>
+                </button>
+                <button type="button" class="variant-btn" data-variant="standard" aria-pressed="false">
+                  <strong>Standar</strong><small>Tanpa modifikasi</small>
+                </button>
+              </div>
+              <h3 id="stego-preview-title">Pratinjau citra hasil</h3>
+              <div class="preview-frame">
+                <img id="stego-preview" class="preview-img" alt="Citra dengan pesan terenkripsi yang telah disisipkan" />
+              </div>
+              <div class="result-actions">
+                <a id="download-stego" class="btn-download" download="stego_image.png">Unduh citra PNG <span aria-hidden="true">&darr;</span></a>
+                <button id="compare-last" type="button" class="btn-download">Bandingkan dengan citra asli <span aria-hidden="true">&#8644;</span></button>
+              </div>
+            </div>
+          </section>
+        </div>
+        <section id="encode-metrics" class="metrics-section" aria-labelledby="metrics-title" hidden>
+          <div class="section-heading">
+            <h2 id="metrics-title">Evaluasi hasil</h2>
+            <p>Kualitas citra, penggunaan kapasitas, dan perbandingan algoritma.</p>
+          </div>
+          <dl class="metrics-grid">
+            <div><dt>PSNR</dt><dd id="m-psnr"></dd></div>
+            <div><dt>MSE</dt><dd id="m-mse"></dd></div>
+            <div><dt>Waktu enkripsi + sisip</dt><dd id="m-time"></dd></div>
+            <div><dt>Dimensi citra</dt><dd id="m-dim"></dd></div>
+            <div><dt>Bit disisipkan</dt><dd id="m-bits"></dd></div>
+            <div><dt>Rasio kapasitas</dt><dd id="m-ratio"></dd></div>
+          </dl>
+          <table>
+            <caption>Blowfish Standar vs Modified Blowfish</caption>
+            <thead>
+              <tr><th scope="col">Parameter</th><th scope="col">Blowfish Standar</th><th scope="col">Modified Blowfish</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Panjang ciphertext</th><td id="b-std-len"></td><td id="b-mod-len"></td></tr>
+              <tr><th scope="row">Waktu enkripsi + penyisipan</th><td id="b-std-pipeline"></td><td id="b-mod-pipeline"></td></tr>
+              <tr><th scope="row">MSE citra stego</th><td id="b-std-mse"></td><td id="b-mod-mse"></td></tr>
+              <tr><th scope="row">PSNR citra stego</th><td id="b-std-psnr"></td><td id="b-mod-psnr"></td></tr>
+              <tr><th scope="row">Bit berubah / total</th><td id="b-std-bits"></td><td id="b-mod-bits"></td></tr>
+              <tr><th scope="row">Avalanche effect</th><td id="b-std-ae"></td><td id="b-mod-ae"></td></tr>
+              <tr><th scope="row">Waktu penyiapan kunci + enkripsi</th><td id="b-std-time"></td><td id="b-mod-time"></td></tr>
+            </tbody>
+          </table>
+        </section>
+      </section>
+
+      <section id="panel-decode" class="panel" role="tabpanel" aria-labelledby="tab-decode" hidden>
+        <div class="workspace-grid">
+          <form id="decode-form" class="workspace-form">
+            <div class="section-heading">
+              <h2>Pulihkan pesan</h2>
+              <p>Gunakan citra hasil penyisipan dan kunci pengirim.</p>
+            </div>
+            <div class="field">
+              <label id="stego-file-label" for="stego-file">Citra berisi pesan</label>
+              <div class="file-picker">
+                <input type="file" id="stego-file" name="stego_image" accept=".png,.bmp,image/png,image/bmp" aria-labelledby="stego-file-label" aria-describedby="stego-file-hint stego-file-error" required />
+                <label class="file-control" for="stego-file">
+                  <span class="file-icon" aria-hidden="true"></span>
+                  <span class="file-name">Seret &amp; letakkan atau klik untuk pilih foto</span>
+                  <span id="stego-file-hint" class="file-hint">PNG atau BMP · 1 gambar</span>
+                </label>
+                <p id="stego-file-error" class="file-error" role="status"></p>
+              </div>
+            </div>
+            <div class="field">
+              <label for="dec-key">Kunci rahasia <span class="field-hint" id="dec-key-hint">1–56 byte UTF-8</span></label>
+              <input type="password" id="dec-key" name="secret_key" autocomplete="off" placeholder="Masukkan kunci pengirim" aria-describedby="dec-key-hint" required />
+            </div>
+            <button class="btn-primary" type="submit"><span>Ekstrak &amp; dekripsi pesan</span><span aria-hidden="true">&swarr;</span></button>
+            <p id="decode-alert" class="alert" role="status"></p>
+          </form>
+
+          <section class="workspace-output" aria-labelledby="decode-result-title">
+            <div class="section-heading">
+              <h2 id="decode-result-title">Hasil dekripsi</h2>
+              <p>Ciphertext yang diekstrak dan pesan yang dipulihkan.</p>
+            </div>
+            <div class="output-field">
+              <div class="output-label"><h3 id="ext-label">Ciphertext hasil ekstraksi</h3><span>HEX</span></div>
+              <pre id="ext-hex" class="code-box" aria-labelledby="ext-label" data-empty>Menunggu proses ekstraksi.</pre>
+            </div>
+            <div class="field">
+              <label for="recovered-text">Pesan asli</label>
+              <textarea id="recovered-text" readonly placeholder="Pesan yang dipulihkan akan muncul di sini."></textarea>
+            </div>
+            <p id="dec-algorithm" class="timing"></p>
+            <p id="dec-time" class="timing"></p>
+          </section>
+        </div>
+      </section>
+
+      <section id="panel-compare" class="panel" role="tabpanel" aria-labelledby="tab-compare" hidden>
+        <form id="compare-form" class="compare-form">
+          <div class="section-heading">
+            <h2>Bandingkan citra</h2>
+            <p>Uji kualitas citra asli (sebelum enkripsi) terhadap citra hasil steganografi.</p>
+          </div>
+          <div class="compare-pickers">
+            <div class="field">
+              <label id="compare-cover-label" for="compare-cover">Citra asli (sebelum enkripsi)</label>
+              <div class="file-picker">
+                <input type="file" id="compare-cover" name="cover_image" accept=".png,.bmp,image/png,image/bmp" aria-labelledby="compare-cover-label" aria-describedby="compare-cover-hint compare-cover-error" required />
+                <label class="file-control" for="compare-cover">
+                  <span class="file-icon" aria-hidden="true"></span>
+                  <span class="file-name">Seret &amp; letakkan atau klik untuk pilih foto</span>
+                  <span id="compare-cover-hint" class="file-hint">PNG atau BMP · citra cover</span>
+                </label>
+                <p id="compare-cover-error" class="file-error" role="status"></p>
+              </div>
+            </div>
+            <div class="field">
+              <label id="compare-stego-label" for="compare-stego">Citra stego (hasil penyisipan)</label>
+              <div class="file-picker">
+                <input type="file" id="compare-stego" name="stego_image" accept=".png,.bmp,image/png,image/bmp" aria-labelledby="compare-stego-label" aria-describedby="compare-stego-hint compare-stego-error" required />
+                <label class="file-control" for="compare-stego">
+                  <span class="file-icon" aria-hidden="true"></span>
+                  <span class="file-name">Seret &amp; letakkan atau klik untuk pilih foto</span>
+                  <span id="compare-stego-hint" class="file-hint">PNG atau BMP · citra stego</span>
+                </label>
+                <p id="compare-stego-error" class="file-error" role="status"></p>
+              </div>
+            </div>
+          </div>
+          <button class="btn-primary compare-submit" type="submit"><span>Bandingkan citra</span><span aria-hidden="true">&#8644;</span></button>
+          <p id="compare-alert" class="alert" role="status"></p>
+        </form>
+
+        <section id="compare-result" class="compare-result" aria-labelledby="compare-result-title" hidden>
+          <div class="section-heading">
+            <h2 id="compare-result-title">Hasil perbandingan</h2>
+            <p>Pratinjau berdampingan, peta selisih, dan metrik kualitas citra.</p>
+          </div>
+          <div class="compare-preview-grid">
+            <figure class="compare-figure">
+              <div class="preview-frame"><img id="compare-cover-img" class="preview-img" alt="Citra asli sebelum enkripsi" /></div>
+              <figcaption>Citra asli <span>Cover</span></figcaption>
+            </figure>
+            <figure class="compare-figure">
+              <div class="preview-frame"><img id="compare-stego-img" class="preview-img" alt="Citra stego hasil penyisipan pesan" /></div>
+              <figcaption>Citra stego <span>Hasil</span></figcaption>
+            </figure>
+            <figure class="compare-figure">
+              <div class="preview-frame"><img id="compare-diff-img" class="preview-img" alt="Peta selisih piksel antara citra asli dan citra stego" /></div>
+              <figcaption>Peta selisih <span id="compare-diff-note">Piksel berubah ditandai merah</span></figcaption>
+            </figure>
+          </div>
+          <dl class="metrics-grid compare-metrics">
+            <div><dt>PSNR</dt><dd id="c-psnr"></dd></div>
+            <div><dt>MSE</dt><dd id="c-mse"></dd></div>
+            <div><dt>Dimensi citra</dt><dd id="c-dim"></dd></div>
+            <div><dt>Piksel berubah</dt><dd id="c-changed"></dd></div>
+            <div><dt>Rasio piksel berubah</dt><dd id="c-ratio"></dd></div>
+            <div><dt>Selisih maksimum</dt><dd id="c-maxdiff"></dd></div>
+            <div><dt>Rata-rata selisih</dt><dd id="c-mean"></dd></div>
+            <div><dt>Subpiksel berubah</dt><dd id="c-subpixels"></dd></div>
+          </dl>
+          <p id="compare-verdict" class="compare-verdict"></p>
+        </section>
+      </section>
+
+    </section>
+  </main>
+</body>
+</html>
