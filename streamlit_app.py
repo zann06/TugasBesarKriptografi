@@ -168,8 +168,12 @@ st.markdown(
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
 
-    html, body, .stApp, .stMarkdown, p, span, label, input, textarea, button, li {
-        font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif !important;
+    /* Catatan: JANGAN menimpa font pada elemen ikon Material Streamlit
+       (span[data-testid="stIconMaterial"], .material-symbols-rounded, dll),
+       karena ikon tersebut berupa ligature teks dan akan tampil sebagai kata mentah. */
+    html, body, .stApp, .stMarkdown, p, label, input, textarea, li,
+    h1, h2, h3, h4, h5, h6, button, .stButton button {
+        font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
     }
     .stApp {
         background:
@@ -234,6 +238,24 @@ st.markdown(
     }
     .hex-box.empty { color: #adb8aa; }
 
+    .empty-state {
+        display: grid; place-content: center; justify-items: center;
+        min-height: 180px; margin-top: 13px; padding: 18px;
+        border: 1px dashed #323c32; border-radius: 6px;
+        background:
+            radial-gradient(ellipse at center, #182019 20%, transparent 75%),
+            radial-gradient(circle, #8eab782c 1px, transparent 1.5px) center / 15px 15px,
+            #121612;
+        text-align: center;
+    }
+    .empty-state strong { font-size: .87rem; font-weight: 650; color: #edf0e7; }
+    .empty-state p { margin: 3px 0 0; color: #adb8aa; font-size: .78rem; }
+    .empty-state .empty-mark {
+        width: 35px; height: 31px; margin-bottom: 12px;
+        border: 1px solid #5b6c5c; border-radius: 5px;
+        background: radial-gradient(circle at center, #8eb286 1.5px, transparent 2px) 1px 1px / 8px 8px, #223024;
+    }
+
     .verdict {
         margin-top: 14px; padding: 10px 13px; border: 1px solid #456044; border-radius: 6px;
         color: #c6e898; font-size: .86rem;
@@ -252,6 +274,25 @@ st.markdown(
     div[data-testid="stFileUploaderDropzone"] {
         border: 1px dashed #5b6c5c; border-radius: 6px; background: #1d2720;
     }
+    div[data-testid="stFileUploaderDropzone"]:hover { border-color: #c6e898; }
+    div[data-testid="stFileUploaderDropzoneInstructions"] div span { color: #adb8aa; }
+
+    /* Pastikan ikon Material tetap memakai font ikonnya sendiri */
+    span[data-testid="stIconMaterial"],
+    [data-testid="stIconMaterial"],
+    .material-symbols-rounded,
+    .material-icons,
+    .material-icons-outlined {
+        font-family: 'Material Symbols Rounded', 'Material Icons' !important;
+    }
+
+    /* Tema kotak pesan agar sesuai palet gelap-hijau */
+    div[data-testid="stAlertContainer"] {
+        border: 1px solid #323c32; border-radius: 6px; background: #191e19; color: #edf0e7;
+    }
+    div[data-testid="stAlertContainer"] p { color: #edf0e7; }
+    div[data-testid="stAlertContentInfo"] { background: #191e19; }
+
     .stButton > button[kind="primary"], .stDownloadButton > button {
         border-radius: 6px; font-weight: 700;
     }
@@ -387,7 +428,14 @@ def render_encode_tab():
                 '<div class="hex-box empty">Menunggu proses enkripsi.</div>',
                 unsafe_allow_html=True,
             )
-            st.info("Citra hasil penyisipan bisa diunduh setelah pesan berhasil diproses.")
+            st.markdown(
+                '<div class="empty-state">'
+                '<div class="empty-mark"></div>'
+                "<strong>Belum ada citra hasil</strong>"
+                "<p>Citra bisa diunduh setelah pesan berhasil disisipkan.</p>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
             return
 
         variant_key = st.segmented_control(
@@ -527,7 +575,14 @@ def render_decode_tab():
                 '<div class="hex-box empty">Menunggu proses ekstraksi.</div>',
                 unsafe_allow_html=True,
             )
-            st.info("Pesan yang dipulihkan akan muncul di sini.")
+            st.markdown(
+                '<div class="empty-state">'
+                '<div class="empty-mark"></div>'
+                "<strong>Belum ada pesan</strong>"
+                "<p>Pesan yang dipulihkan akan muncul di sini.</p>"
+                "</div>",
+                unsafe_allow_html=True,
+            )
             return
 
         st.markdown(

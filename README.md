@@ -54,6 +54,9 @@ Buka http://127.0.0.1:5000
 
 Panduan deploy ke internet (gratis): lihat [`DEPLOY.md`](DEPLOY.md).
 
+- **Ingin tampilan sama persis seperti versi Flask?** Deploy versi Flask ke Hugging Face Spaces → panduan di [`DEPLOY-HF.md`](DEPLOY-HF.md)
+- **Ingin paling cepat jadi?** Deploy versi Streamlit ke Streamlit Cloud → panduan di [`DEPLOY.md`](DEPLOY.md)
+
 ---
 
 ## Metode
