@@ -1,10 +1,20 @@
-# Tugas Besar Kriptografi
+<div align="center">
+
+# 🔐 Tugas Besar Kriptografi
 
 **Pengamanan Pesan Teks menggunakan Modified Blowfish (Rotasi Bit Dinamis) & Steganografi Key-Based Random LSB pada Citra Digital**
 
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/) [![Flask](https://img.shields.io/badge/Flask-3.0-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/) [![NumPy](https://img.shields.io/badge/NumPy-1.24-013243?style=for-the-badge&logo=numpy&logoColor=white)](https://numpy.org/) [![Pillow](https://img.shields.io/badge/Pillow-10.0-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python-pillow.org/)
+
+[![Blowfish](https://img.shields.io/badge/Blowfish-Modified_ROTL32-2E7D32?style=for-the-badge&logo=letsencrypt&logoColor=white)](#metode) [![Steganografi](https://img.shields.io/badge/Steganografi-Random_LSB-6A1B9A?style=for-the-badge&logo=torproject&logoColor=white)](#metode) [![Lokal](https://img.shields.io/badge/Jalur-Lokal_Only-455A64?style=for-the-badge&logo=linux&logoColor=white)](#cara-menjalankan-di-lokal) [![Lisensi](https://img.shields.io/badge/Lisensi-Akademik-8D6E63?style=for-the-badge&logo=academia&logoColor=white)](#lisensi)
+
+</div>
+
+---
+
 Aplikasi web lokal untuk mengenkripsi pesan teks dengan Blowfish yang dimodifikasi, lalu menyembunyikan ciphertext ke dalam citra digital menggunakan steganografi LSB dengan urutan piksel acak yang diturunkan dari kunci rahasia.
 
-> Aplikasi berjalan **sepenuhnya lokal** di komputer sendiri (`http://127.0.0.1:5000`) — tidak butuh internet, tidak butuh akun, dan pesan tidak pernah keluar dari mesin kamu.
+> 💡 Aplikasi berjalan **sepenuhnya lokal** di komputer sendiri (`http://127.0.0.1:5000`) — tidak butuh internet, tidak butuh akun, dan pesan tidak pernah keluar dari mesin kamu.
 
 ---
 
@@ -20,7 +30,6 @@ Aplikasi web lokal untuk mengenkripsi pesan teks dengan Blowfish yang dimodifika
   - [3. Tabel Evaluasi Algoritma](#3-tabel-evaluasi-algoritma)
   - [4. Tab Pembanding — Cover vs Stego](#4-tab-pembanding--cover-vs-stego)
   - [5. Tab Penerima — Ekstraksi & Dekripsi](#5-tab-penerima--ekstraksi--dekripsi)
-  - [6. Tampilan di Ponsel](#6-tampilan-di-ponsel)
 - [Memahami Metrik](#memahami-metrik)
 - [Struktur Proyek](#struktur-proyek)
 - [Metode](#metode)
@@ -39,19 +48,19 @@ Aplikasi web lokal untuk mengenkripsi pesan teks dengan Blowfish yang dimodifika
 - **Dekripsi auto-deteksi** — penerima tidak perlu tahu algoritma yang dipakai; sistem mencoba kedua varian secara otomatis.
 - **Pembanding citra** — membandingkan citra asli (cover) dengan citra stego: pratinjau berdampingan, peta selisih, MSE, PSNR, dan jumlah piksel yang berubah.
 - **Evaluasi algoritma** — tabel perbandingan avalanche effect, waktu enkripsi, MSE, dan PSNR antara Blowfish Standar dan Modified Blowfish.
-- **Antarmuka responsif** — bisa dipakai dari laptop maupun ponsel.
+- **Antarmuka modern** — satu halaman dengan tiga tab, pratinjau citra langsung, dan unduhan stego sekali klik.
 
 ---
 
 ## Pratinjau Aplikasi
 
-| Halaman awal | Hasil enkripsi & penyisipan |
+| Halaman awal | Form terisi |
 |---|---|
-| ![Halaman awal](docs/01-halaman-awal.png) | ![Hasil enkripsi](docs/03-hasil-enkripsi.png) |
+| ![Halaman awal](docs/01-halaman-awal.png) | ![Form terisi](docs/02-form-terisi.png) |
 
-| Pembanding cover vs stego | Tampilan ponsel |
+| Hasil Modified Blowfish | Hasil Blowfish Standar |
 |---|---|
-| ![Pembanding](docs/06-pembanding.png) | ![Mobile](docs/08-tampilan-mobile.png) |
+| ![Hasil enkripsi](docs/03-hasil-enkripsi.png) | ![Varian standar](docs/04-varian-standar.png) |
 
 ---
 
@@ -233,13 +242,6 @@ Aplikasi akan:
 Jika kunci salah, aplikasi menolak dengan pesan
 *"Pesan tidak ditemukan atau kunci rahasia salah."* — validasi PKCS#7 padding yang gagal
 membuat hasil dekripsi tidak lolos pemeriksaan.
-
-### 6. Tampilan di Ponsel
-
-Antarmuka menyesuaikan lebar layar, jadi bisa dipakai dari browser ponsel
-selama server lokal dapat diakses dari perangkat tersebut.
-
-![Tampilan mobile](docs/08-tampilan-mobile.png)
 
 ---
 
