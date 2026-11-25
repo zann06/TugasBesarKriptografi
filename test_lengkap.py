@@ -38,7 +38,7 @@ AMBANG_AE_MIN = 40.0           # batas bawah Avalanche Effect (%)
 AMBANG_AE_MAX = 60.0           # batas atas Avalanche Effect (%)
 AMBANG_SENS_MIN = 40.0         # batas bawah sensitivitas kunci (%)
 AMBANG_SENS_MAX = 60.0         # batas atas sensitivitas kunci (%)
-JUMLAH_FLIP_AE = 100           # jumlah sampel bit-flip untuk Avalanche Effect
+JUMLAH_FLIP_AE = 64            # enumerasi penuh seluruh bit blok 64-bit
 
 KEY = "KunciRahasiaITERA2026"
 KEY_BYTES = KEY.encode("utf-8")
@@ -395,6 +395,43 @@ def uji_pipeline():
 
 
 # ============================================================
+# H. PENOLAKAN KUNCI SALAH
+# ============================================================
+def uji_kunci_salah():
+    print("\n" + "=" * 78)
+    print("H. PENOLAKAN KUNCI SALAH")
+    print("=" * 78)
+
+    cover = buat_citra(256, 256)
+    pesan = "Pesan rahasia yang harus terlindungi".encode()
+
+    for varian in VARIAN:
+        bf = cipher(varian)
+        ct = bf.encrypt_bytes(pesan)
+        st = embed_lsb(cover, ct, KEY)
+
+        # 1. kunci salah pada ekstraksi
+        ditolak_ekstrak = False
+        try:
+            extract_lsb(st, "KunciSalah2026")
+        except ValueError:
+            ditolak_ekstrak = True
+        catat(f"H1-{varian}", "Ekstraksi dengan kunci salah ditolak ValueError",
+              ditolak_ekstrak)
+
+        # 2. kunci salah pada dekripsi (ciphertext benar, kunci beda)
+        bf_salah = cipher(varian, b"KunciSalah2026")
+        ditolak_dekrip = False
+        try:
+            hasil = bf_salah.decrypt_bytes(ct).decode("utf-8")
+            ditolak_dekrip = (hasil != pesan.decode())
+        except (ValueError, UnicodeDecodeError):
+            ditolak_dekrip = True
+        catat(f"H2-{varian}", "Dekripsi dengan kunci salah tidak menghasilkan plaintext",
+              ditolak_dekrip)
+
+
+# ============================================================
 # MAIN
 # ============================================================
 def main():
@@ -414,6 +451,7 @@ def main():
     uji_avalanche()
     uji_sensitivitas_kunci()
     uji_pipeline()
+    uji_kunci_salah()
     durasi = time.perf_counter() - t_mulai
 
     # ringkasan
